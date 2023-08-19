@@ -1,8 +1,9 @@
 const promptModel = require('../models/promptModel');
 
+const { ObjectId } = require('mongodb');
 
 const promptGetAll = (req, res) => {
-    return promptModel.find()
+    return promptModel.find({ user: new ObjectId(req.user) })
         .then(prompts => {
             return prompts;
         })
@@ -14,7 +15,7 @@ const promptGetAll = (req, res) => {
 
 const promptSearch = (req, res) => {
     const { name, tag } = req
-    let filters = {};
+    let filters = { user: new ObjectId(req.user) };
 
     // If the user has entered a search term in either field then we will filter by that value and send back all matching results to the client side
     if (name) {

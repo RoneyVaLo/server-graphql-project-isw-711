@@ -5,13 +5,13 @@ exports.graphQLschema = buildSchema(`
     scalar JSON
 
     type Query {
-        getAllPrompts: [Prompt]
-        searchPrompts(name: String, tag: String): [Prompt]
+        getAllPrompts(user: ID!): [Prompt]
+        searchPrompts(user: ID!, name: String, tag: String): [Prompt]
     }
 
     type Prompt {
         _id: ID!
-        user: String
+        user: ID!
         name: String
         type: String
         data: JSON
