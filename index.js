@@ -22,12 +22,7 @@ const { promptGetAll, promptSearch } = require('./controllers/promptController.j
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-// expose in the root element the different entry points of the
-// graphQL service
-const graphqlResolvers = {
-    getAllPrompts: promptGetAll,
-    searchPrompts: (req) => promptSearch(req),
-};
+
 
 // Middlewares
 app.use(bodyParser.json());
@@ -38,34 +33,43 @@ app.use(cors({
     methods: "*"
 }));
 
-// JWT Authentication middleware
-// app.use(function (req, res, next) {
-//   if (req.headers["authorization"]) {
-//     const authToken = req.headers['authorization'].split(' ')[1];
-//     try {
-//       jwt.verify(authToken, theSecretKey, (err, decodedToken) => {
-//         if (err || !decodedToken) {
-//           res.status(401);
-//           res.json({
-//             error: "Unauthorized"
-//           });
-//         }
-//         console.log(decodedToken);
-//         next();
-//       });
-//     } catch (e) {
-//       res.status(401);
-//       res.send({
-//         error: "Unauthorized "
-//       });
-//     }
-//   } else {
-//     res.status(401);
-//     res.send({
-//       error: "Unauthorized "
-//     });
-//   }
-// });
+app.use(async (req, res, next) => {
+
+    if (req.headers["authorization"]) {
+        const token = req.headers['authorization'].split(' ')[1];
+        try {
+            jwt.verify(token, theSecretKey, (err, decodedToken) => {
+                if (err || !decodedToken) {
+                    res.status(401);
+                    res.json({
+                        error: "Unauthorized"
+                    });
+                } else {
+                    next();
+                };
+            });
+        } catch (e) {
+            console.log("Catch")
+            res.status(422);
+            res.send({
+                error: "There was an error: " + e.message
+            });
+        }
+    } else {
+        console.log("Else")
+        res.status(401);
+        res.send({
+            error: "Unauthorized "
+        });
+    }
+});
+
+// expose in the root element the different entry points of the
+// graphQL service
+const graphqlResolvers = {
+    getAllPrompts: promptGetAll,
+    searchPrompts: (req) => promptSearch(req),
+};
 
 app.use('/graphql', graphqlHTTP({
     schema: graphQLschema,
